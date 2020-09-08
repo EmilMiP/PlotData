@@ -208,7 +208,7 @@ manhattanPlot = function(Path,
     while (nrow(sugg_snps) > 0) {
       cur_sugg_snp = sugg_snps[which.max(sugg_snps[[pvalColName]]),]
       sugg_store   = rbind(sugg_store, cur_sugg_snp)
-      sugg_snps    = sugg_snps[abs(cur_sugg_snp[1] - sugg_snps$BPcum) > distance,]
+      sugg_snps    = sugg_snps[abs(cur_sugg_snp$BPcum - sugg_snps$BPcum) > distance,]
     }
     cat("exited finding suggestive snps \n")
     
