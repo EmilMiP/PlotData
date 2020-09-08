@@ -43,7 +43,7 @@ manhattanPlot = function(Path,
                          topSNPs = F,
                          SNP_distance = 100) {
   data = dplyr::as_tibble(data.table::fread(file = Path, header = T))
-  data[["BP"]] = as.double(data[[BasePairName]])
+  data[["BP"]] = as.double(data[[basePairName]])
   data[["CHR"]] = as.integer(data[[chrName]])
   data[[pvalColName]] = as.numeric(data[[pvalColName]])
 
