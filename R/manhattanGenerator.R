@@ -181,7 +181,7 @@ manhattanPlot = function(Path,
     
     while(nrow(sigg_snps) > 0) {
       cur_sigg_snp = sigg_snps[which.max(sigg_snps[[pvalColName]]),]
-      sigg_store    = rbind(sigg_store, cur_sigg_snp)
+      sigg_store   = rbind(sigg_store, cur_sigg_snp)
       sigg_snps    = sigg_snps[abs(cur_sigg_snp$BPcum - sigg_snps$BPcum) > distance,]
     }
     
@@ -200,16 +200,17 @@ manhattanPlot = function(Path,
     
     BPs_to_remove = sigg_store$BPcum
     
-    while( length(BPs_to_remove) > 0) {
+    while (length(BPs_to_remove) > 0) {
       sugg_snps = sugg_snps[abs(BPs_to_remove[1] - sugg_snps$BPcum) > distance,]
       BPs_to_remove = BPs_to_remove[-1]
     }
-    
-    while (nrow(sugg_snps) > 0){
+    cat("exited remove significant snps before finding suggestive snps \n")
+    while (nrow(sugg_snps) > 0) {
       cur_sugg_snp = sugg_snps[which.max(sugg_snps[[pvalColName]]),]
       sugg_store   = rbind(sugg_store, cur_sugg_snp)
       sugg_snps    = sugg_snps[abs(BPs_to_remove[1] - sugg_snps$BPcum) > distance,]
     }
+    cat("exited finding suggestive snps \n")
     
     if (nrow(sugg_store) > 0) {
       sugg_file_dist = paste(outDist, "/", imgName, ".suggSNPs", sep = "")
