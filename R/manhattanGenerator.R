@@ -124,7 +124,7 @@ manhattanPlot = function(Path,
       ggplot2::labs(x = "Chromosome", y = "-log10(P)") +
       
       ggplot2::geom_hline(yintercept = -log10(bonferoni_alpha)) +
-      ggplot2::goem_hline(yintercept = -log10(sugg), linetype = "dashed") +
+      ggplot2::geom_hline(yintercept = -log10(sugg), linetype = "dashed") +
       
       ggplot2::theme_bw(base_size = 11) +
       theme(
