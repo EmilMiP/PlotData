@@ -1,7 +1,33 @@
 library(ggplot2)
 library(dplyr)
+library(data.table)
 
+#import::from(dplyr, "%>%")
 
+#'
+#' Function to generate manhattan plot, QQ plot or top SNPs.
+#'
+#' @param Path Path to summary statistics
+#' @param imgName Name of the images to generate.
+#' @param title title on plots
+#' @param outDist path to the output destination folder for plots and top snps
+#' @param sugg suggestive threshold, default is 5e-6
+#' @param sigg genome-wide significant threshold, default is 5e-8
+#' @param Manhattan True/False variable for whether or not to generate the manhattan plot
+#' @param pvalColName Name of p value column in summary statistics file
+#' @param basePairName Name of basepair column in summary statistics file
+#' @param chrName Name of chromosome column in summary statistics file
+#' @param QQ True/False variable for whether or not to generate the QQ plot
+#' @param chisqCol Name of ChiSQ column in summary statistics file 
+#' @param topSNPs True/False variable for whether or not to generate top snps files
+#' @param SNP_distance distance used to determine independent snps
+#'
+#' 
+#' @return Generates a manhattan plot or QQ plot. If asked to, it will also store the top snps that are either genomewide significant or suggestive to separate files.
+#'
+#'
+#' @export
+#' 
 manhattanPlot = function(Path,
                          imgName,
                          title,
@@ -16,7 +42,7 @@ manhattanPlot = function(Path,
                          chisqCol = "CHISQ_LINREG",
                          topSNPs = F,
                          SNP_distance = 100) {
-  data = as_tibble(fread(file = Path, header = T))
+  data = dplyr::as_tibble(data.table::fread(file = Path, header = T))
   data[["BP"]] = as.double(data[[BasePairName]])
   data[["CHR"]] = as.integer(data[[chrName]])
   data[[pvalColName]] = as.numeric(data[[pvalColName]])
@@ -37,13 +63,13 @@ manhattanPlot = function(Path,
   }
   #this data will form the basis for extrating the top snps and the manhattan plot
   dataplyr = data %>%
-    group_by(CHR) %>%
-    summarise(chr_len = max(BP)) %>%
-    mutate(tot = cumsum(chr_len) - chr_len) %>%
-    select(-chr_len) %>%
-    left_join(data, ., by = c("CHR" = "CHR")) %>%
-    arrange(CHR, BP) %>%
-    mutate(BPcum = BP + tot)
+    dplyr::group_by(CHR) %>%
+    dplyr::summarise(chr_len = max(BP)) %>%
+    dplyr::mutate(tot = cumsum(chr_len) - chr_len) %>%
+    dplyr::select(-chr_len) %>%
+    dplyr::left_join(data, ., by = c("CHR" = "CHR")) %>%
+    dplyr::arrange(CHR, BP) %>%
+    dplyr::mutate(BPcum = BP + tot)
   
   
   if (sigg != 5e-8) {
@@ -56,7 +82,7 @@ manhattanPlot = function(Path,
   
   if (bonferoni_alpha > sugg) {
     cat("Bonferoni corrected significance level *higher* than suggested significance level!\n Bonferioni:", bonferoni_alpha, "\n suggeted:", sugg, "\n Terminating.." )
-    break()
+    stop()
   }
   
   if (noManhattan) {
@@ -74,8 +100,8 @@ manhattanPlot = function(Path,
     
     dataplyr = dataplyr[!filtervec,]
     axisdataplyr = dataplyr %>% 
-      group_by(CHR) %>%
-      summarize(center = (max(BPcum) + min(BPcum))/ 2)
+      dplyr::group_by(CHR) %>%
+      dplyr::summarize(center = (max(BPcum) + min(BPcum))/ 2)
     
     non_sig_data = subset(dataplyr, non_sig == T)
     sig_P_data = subset(dataplyr, sig_P == T)
@@ -85,22 +111,22 @@ manhattanPlot = function(Path,
     
     column = ensym(pvalColName)
     
-    manPlot = ggplot(dataplyr, aes(x = BPcum, y = -log10(!!column)) ) +
-      geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .8) +
-      geom_point(data = sig_P_data , color = "red", size = 2, alpha = .8) +
-      geom_point(data = non_sig_data, size = 2, alpha = .5, aes(color = as.factor(CHR))) +
+    manPlot = ggplot2::ggplot(dataplyr, aes(x = BPcum, y = -log10(!!column)) ) +
+      ggplot2::geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .8) +
+      ggplot2::geom_point(data = sig_P_data , color = "red", size = 2, alpha = .8) +
+      ggplot2::geom_point(data = non_sig_data, size = 2, alpha = .5, aes(color = as.factor(CHR))) +
     
-      scale_color_manual(values = rep(c("gray", "darkgray"), 11)) +
-      scale_x_continuous(labels = axisdataplyr$CHR, breaks = axisdataplyr$center) +
-      scale_y_continuous(expand = c(0,0), limits = ylims) +
+      ggplot2::scale_color_manual(values = rep(c("gray", "darkgray"), 11)) +
+      ggplot2::scale_x_continuous(labels = axisdataplyr$CHR, breaks = axisdataplyr$center) +
+      ggplot2::scale_y_continuous(expand = c(0,0), limits = ylims) +
       
-      ggtitle(title) +
-      labs(x = "Chromosome", y = "-log10(P)") +
+      ggplot2::ggtitle(title) +
+      ggplot2::labs(x = "Chromosome", y = "-log10(P)") +
       
-      geom_hline(yintercept = -log10(bonferoni_alpha)) +
-      goem_hline(yintercept = -log10(sugg), linetype = "dashed") +
+      ggplot2::geom_hline(yintercept = -log10(bonferoni_alpha)) +
+      ggplot2::goem_hline(yintercept = -log10(sugg), linetype = "dashed") +
       
-      theme_bw(base_size = 11) +
+      ggplot2::theme_bw(base_size = 11) +
       theme(
         plot.title = element_text(hjust = .5),
         legend.position = "none",
@@ -117,18 +143,18 @@ manhattanPlot = function(Path,
   if(QQ) {
     cat("Working on QQ plot. \n")
     
-    qqDat = tibble(obs_chi = sort(dataplyr[[chisqCol]]),
+    qqDat = dplyr::tibble(obs_chi = sort(dataplyr[[chisqCol]]),
                    teo_chi = sort(rchisq(n = sum(!is.na(obs_chi)), df = 1))
                    )
-    QQplot = ggplot(qqDat, aes(x = teo_chi, y = obs_chi)) +
-      geom_points() +
-      geom_abline(intercept = 0, slope = 1) + 
+    QQplot = ggplot2::ggplot(qqDat, aes(x = teo_chi, y = obs_chi)) +
+      ggplot2::geom_points() +
+      ggplot2::geom_abline(intercept = 0, slope = 1) + 
       
-      ggtitle(title) + 
-      labs(x = "theoretical Chisquare", y = "Observed Chisquare")
+      ggplot2::ggtitle(title) + 
+      ggplot2::labs(x = "theoretical Chisquare", y = "Observed Chisquare")
       
-      theme_bw(base_size = 11) +
-      theme(
+      ggplot2::theme_bw(base_size = 11) +
+      ggplot2::theme(
         plot.title = element_text(hjust = .5),
         legend.position = "none",
         panel.border = "none",
@@ -151,7 +177,7 @@ manhattanPlot = function(Path,
     column = as.name(pvalColName)
     
     sigg_store = data.frame()
-    sigg_snps = dataplyr %>% filter(bonferoni_alpha > !!column)
+    sigg_snps = dataplyr %>% dplyr::filter(bonferoni_alpha > !!column)
     
     while(nrow(sigg_snps) > 0) {
       cur_sigg_snp = sigg_snps[which.max(sigg_snps[[pvalColName]]),]
@@ -162,14 +188,14 @@ manhattanPlot = function(Path,
     if (nrow(sigg_store) > 0) {
       sigg_file_dist = paste(outDist, "/", imgName, ".sigSNPs", sep = "")
       cat("Saving list of independent significant SNPs to ", sigg_file_dist, "\n")
-      fwrite(as.data.frame(sigg_store), file = sigg_file_dist,
+      data.table::fwrite(as.data.frame(sigg_store), file = sigg_file_dist,
              sep = " ", 
              quote = F,
              na = "NA")
     }
     
     sugg_store = data.frame()
-    sugg_snps = dataplyr %>% filter((bonferoni_alpha < !! column) & (!!column < sugg) )
+    sugg_snps = dataplyr %>% dplyr::filter((bonferoni_alpha < !! column) & (!!column < sugg) )
     #remove suggestive snps that are already close to a significant snp.
     
     BPs_to_remove = sigg_store$BPcum
@@ -188,7 +214,7 @@ manhattanPlot = function(Path,
     if (nrow(sugg_store) > 0) {
       sugg_file_dist = paste(outDist, "/", imgName, ".suggSNPs", sep = "")
       cat("Saving list of independent suggestive SNPs to ", sugg_file_dist, "\n")
-      fwrite(as.data.frame(sugg_store), file = sugg_file_dist,
+      data.table::fwrite(as.data.frame(sugg_store), file = sugg_file_dist,
              sep = " ", 
              quote = F,
              na = "NA")
