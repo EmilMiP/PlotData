@@ -85,7 +85,7 @@ manhattanPlot = function(Path,
     stop()
   }
   
-  if (noManhattan) {
+  if (Manhattan) {
     cat("Working on Manhattan plot. \n")
     
     
