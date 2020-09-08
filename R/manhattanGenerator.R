@@ -135,7 +135,7 @@ manhattanPlot = function(Path,
         panel.grid.minor.x = element_blank()
       )
     manOut = paste(outDist, "/", imgName, ".png", sep = "")
-    png(manOut, width = 950, height = 450)
+    png(manOut, width = 1920, height = 1080)
     print(manPlot)
     dev.off()
   }
@@ -165,7 +165,7 @@ manhattanPlot = function(Path,
     
     qqOut = paste(outDist, "/", imgName, "QQ.png", sep = "")
     
-    png(qqOut, width = 950, height = 450)
+    png(qqOut, width = 1920, height = 1080)
     print(QQplot)
     dev.off()
   }
