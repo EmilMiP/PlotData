@@ -61,6 +61,11 @@ manhattanPlot = function(Path,
     cat("Removing", sum(data[[pvalColName]] == 0), "SNPs with a p-value of 0. \n")
     data = data[!(data[[pvalColName]] == 0),]
   }
+  
+  if (any(data$CHR > 22)) {
+    cat("more than 22 chromosomes detected, removing chromosome 23 and above. \n")
+    data = filter(data, CHR <= 22)
+  }
   #this data will form the basis for extrating the top snps and the manhattan plot
   dataplyr = data %>%
     dplyr::group_by(CHR) %>%
@@ -204,14 +209,13 @@ manhattanPlot = function(Path,
       sugg_snps = sugg_snps[abs(BPs_to_remove[1] - sugg_snps$BPcum) > distance,]
       BPs_to_remove = BPs_to_remove[-1]
     }
-    cat("exited remove significant snps before finding suggestive snps \n")
+
     while (nrow(sugg_snps) > 0) {
       cur_sugg_snp = sugg_snps[which.max(sugg_snps[[pvalColName]]),]
       sugg_store   = rbind(sugg_store, cur_sugg_snp)
       sugg_snps    = sugg_snps[abs(cur_sugg_snp$BPcum - sugg_snps$BPcum) > distance,]
     }
-    cat("exited finding suggestive snps \n")
-    
+
     if (nrow(sugg_store) > 0) {
       sugg_file_dist = paste(outDist, "/", imgName, ".suggSNPs", sep = "")
       cat("Saving list of independent suggestive SNPs to ", sugg_file_dist, "\n")
