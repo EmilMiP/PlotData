@@ -63,7 +63,7 @@ manhattanPlot = function(Path,
   }
   
   if (any(data$CHR > 22)) {
-    cat("more than 22 chromosomes detected, removing chromosome 23 and above. \n")
+    cat("More than 22 chromosomes detected, removing chromosome 23 and above. \n")
     data = filter(data, CHR <= 22)
   }
   #this data will form the basis for extrating the top snps and the manhattan plot
