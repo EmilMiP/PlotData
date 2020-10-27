@@ -102,7 +102,7 @@ manhattanPlot_noSave = function(Path,
     sig_P_data = subset(dataplyr, sig_P == T)
     sugg_P_data = subset(dataplyr, sugg_P == T)
     ymax = max(-log10(dataplyr[[pvalColName]]) + 2, -log10(bonferoni_alpha) + 2)
-    ylims = c(0, ymax)
+    ylims = c(-log10(0.05), ymax)
     
     column = ensym(pvalColName)
     
