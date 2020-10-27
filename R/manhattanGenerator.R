@@ -101,9 +101,9 @@ manhattanPlot = function(Path,
     dataplyr[["non_sig"]] = ifelse((dataplyr[[pvalColName]] >= sugg), T, F)
     
     dataplyr[["aboveunif"]] = runif(n = nrow(dataplyr))
-    filtervec = (dataplyr[[pvalColName]] > .05) & (dataplyr$aboveunif >= .5 ) ### is this valid ? does it do what i think it does?
+   
     
-    dataplyr = dataplyr[!filtervec,]
+    dataplyr = filter(dataplyr, !!as.symbol(pvalColName) < 0.05)  #removing any snps that are not nominally significant
     axisdataplyr = dataplyr %>% 
       dplyr::group_by(CHR) %>%
       dplyr::summarize(center = (max(BPcum) + min(BPcum))/ 2)
