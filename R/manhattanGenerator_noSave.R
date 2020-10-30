@@ -125,8 +125,8 @@ manhattanPlot_noSave = function(Path,
     
     manPlot = ggplot2::ggplot(dataplyr, aes(x = BPcum, y = -log10(!!column)) ) +
       ggplot2::geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .5) +
-      ggplot2::geom_point(data = sig_P_data , color = hsv(0, s = .4, v = 1), size = 2, alpha = .5) +
-      ggplot2::geom_point(data = sigg_store , color = "red", size = 2, alpha = .5, shape = 23) +
+      ggplot2::geom_point(data = sig_P_data , color = hsv(0, s = .4, v = 1), size = 2, alpha = .7) +
+      ggplot2::geom_point(data = sigg_store , color = "red", size = 2, shape = 23) +
       ggplot2::geom_point(data = non_sig_data, size = 2, alpha = .5, aes(color = as.factor(CHR))) +
       
       ggplot2::scale_color_manual(values = rep(c("gray", "darkgray"), 11)) +
