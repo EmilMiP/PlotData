@@ -32,7 +32,7 @@ manhattanPlot_noSave = function(Path,
                          basePairName = "BP",
                          chrName = "CHR",
                          chisqCol = "CHISQ_LINREG",
-                         SNP_distance = 100) {
+                         SNP_distance = 250) {
   data = dplyr::as_tibble(data.table::fread(file = Path, header = T))
   data[["BP"]] = as.double(data[[basePairName]]) #needed to avoid integer overflow
   data[["CHR"]] = as.integer(data[[chrName]])
@@ -116,7 +116,7 @@ manhattanPlot_noSave = function(Path,
     sigg_snps = dataplyr %>% dplyr::filter(bonferoni_alpha > !!column)
     
     while(nrow(sigg_snps) > 0) {
-      cur_sigg_snp = sigg_snps[which.max(sigg_snps[[pvalColName]]),]
+      cur_sigg_snp = sigg_snps[which.min(sigg_snps[[pvalColName]]),]
       sigg_store   = rbind(sigg_store, cur_sigg_snp)
       sigg_snps    = sigg_snps[abs(cur_sigg_snp$BPcum - sigg_snps$BPcum) > distance,]
     }
@@ -125,7 +125,7 @@ manhattanPlot_noSave = function(Path,
     
     manPlot = ggplot2::ggplot(dataplyr, aes(x = BPcum, y = -log10(!!column)) ) +
       ggplot2::geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .5) +
-      ggplot2::geom_point(data = sig_P_data , color = hsv(.55, s = .4, v = 1), size = 2, alpha = .5) +
+      ggplot2::geom_point(data = sig_P_data , color = hsv(0, s = .4, v = 1), size = 2, alpha = .5) +
       ggplot2::geom_point(data = sigg_store , color = "red", size = 2, alpha = .5, shape = 23) +
       ggplot2::geom_point(data = non_sig_data, size = 2, alpha = .5, aes(color = as.factor(CHR))) +
       
