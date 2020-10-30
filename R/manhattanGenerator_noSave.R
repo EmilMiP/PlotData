@@ -31,9 +31,10 @@ manhattanPlot_noSave = function(Path,
                          pvalColName = "P_BOLT_LMM_INF",
                          basePairName = "BP",
                          chrName = "CHR",
-                         chisqCol = "CHISQ_LINREG") {
+                         chisqCol = "CHISQ_LINREG",
+                         SNP_distance = 100) {
   data = dplyr::as_tibble(data.table::fread(file = Path, header = T))
-  data[["BP"]] = as.double(data[[basePairName]])
+  data[["BP"]] = as.double(data[[basePairName]]) #needed to avoid integer overflow
   data[["CHR"]] = as.integer(data[[chrName]])
   data[[pvalColName]] = as.numeric(data[[pvalColName]])
   
@@ -105,10 +106,27 @@ manhattanPlot_noSave = function(Path,
     ylims = c(-log10(0.05), ymax)
     
     column = ensym(pvalColName)
+    # find top snps to mark separately
+    cat("Distance used:", SNP_distance, "Kb \n")
+    distance = SNP_distance * 1000
+    
+    column = as.name(pvalColName)
+    
+    sigg_store = data.frame()
+    sigg_snps = dataplyr %>% dplyr::filter(bonferoni_alpha > !!column)
+    
+    while(nrow(sigg_snps) > 0) {
+      cur_sigg_snp = sigg_snps[which.max(sigg_snps[[pvalColName]]),]
+      sigg_store   = rbind(sigg_store, cur_sigg_snp)
+      sigg_snps    = sigg_snps[abs(cur_sigg_snp$BPcum - sigg_snps$BPcum) > distance,]
+    }
+    
+    
     
     manPlot = ggplot2::ggplot(dataplyr, aes(x = BPcum, y = -log10(!!column)) ) +
-      ggplot2::geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .8) +
-      ggplot2::geom_point(data = sig_P_data , color = "red", size = 2, alpha = .8) +
+      ggplot2::geom_point(data = sugg_P_data, color = "orange", size = 2, alpha = .5) +
+      ggplot2::geom_point(data = sig_P_data , color = "red", size = 2, alpha = .5) +
+      ggplot2::geom_point(data = sigg_store , color = "red", size = 2, alpha = .5) +
       ggplot2::geom_point(data = non_sig_data, size = 2, alpha = .5, aes(color = as.factor(CHR))) +
       
       ggplot2::scale_color_manual(values = rep(c("gray", "darkgray"), 11)) +
