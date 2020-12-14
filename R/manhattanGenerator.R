@@ -185,7 +185,7 @@ manhattanPlot = function(Path,
     sigg_snps = dataplyr %>% dplyr::filter(bonferoni_alpha > !!column)
     
     while(nrow(sigg_snps) > 0) {
-      cur_sigg_snp = sigg_snps[which.max(sigg_snps[[pvalColName]]),]
+      cur_sigg_snp = sigg_snps[which.min(sigg_snps[[pvalColName]]),]
       sigg_store   = rbind(sigg_store, cur_sigg_snp)
       sigg_snps    = sigg_snps[abs(cur_sigg_snp$BPcum - sigg_snps$BPcum) > distance,]
     }
@@ -211,7 +211,7 @@ manhattanPlot = function(Path,
     }
 
     while (nrow(sugg_snps) > 0) {
-      cur_sugg_snp = sugg_snps[which.max(sugg_snps[[pvalColName]]),]
+      cur_sugg_snp = sugg_snps[which.min(sugg_snps[[pvalColName]]),]
       sugg_store   = rbind(sugg_store, cur_sugg_snp)
       sugg_snps    = sugg_snps[abs(cur_sugg_snp$BPcum - sugg_snps$BPcum) > distance,]
     }
